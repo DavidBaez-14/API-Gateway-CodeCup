@@ -1,0 +1,57 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin
+
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowed-origin-patterns:
+              - "http://localhost:5173"
+            allowed-methods:
+              - GET
+              - POST
+              - PUT
+              - PATCH
+              - DELETE
+              - OPTIONS
+            allowed-headers:
+              - "*"
+            allow-credentials: true
+
+      routes:
+
+        - id: ms1-identidad
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/auth/**,/api/admin/**,/api/jugadores/**,/.well-known/**
+          filters:
+            - StripPrefix=0
+
+        - id: ms2-supercopa
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/supercopa/**
+          filters:
+            - StripPrefix=0
+
+        - id: ms3-finanzas
+          uri: http://localhost:8083
+          predicates:
+            - Path=/api/finanzas/**
+          filters:
+            - StripPrefix=0
+
+        - id: ms4-analytics
+          uri: http://localhost:8084
+          predicates:
+            - Path=/api/analytics/**
+          filters:
+            - StripPrefix=0
