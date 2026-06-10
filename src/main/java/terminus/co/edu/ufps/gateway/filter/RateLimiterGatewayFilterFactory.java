@@ -7,7 +7,6 @@ import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 import java.util.Map;
@@ -15,30 +14,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Filtro de Rate Limiting por IP usando Bucket4j (en memoria, sin Redis).
- *
- * Estrategia Sliding Window con Token Bucket:
- *   - Límite general: 60 requests / minuto por IP (1 req/seg en promedio).
- *   - El bucket se recarga token a token cada segundo (burst suavizado).
- *
- * Si el cliente supera el límite recibe HTTP 429 Too Many Requests
- * con el header 'X-RateLimit-Remaining' para que el frontend pueda
- * mostrar feedback al usuario.
- *
- * Uso en application.yml:
- *   filters:
- *     - name: RateLimiter
- *       args:
- *         capacity: 60
- *         refillTokens: 60
- *         refillDurationSeconds: 60
  */
 @Component
-public class RateLimiterFilter extends AbstractGatewayFilterFactory<RateLimiterFilter.Config> {
+public class RateLimiterGatewayFilterFactory extends AbstractGatewayFilterFactory<RateLimiterGatewayFilterFactory.Config> {
 
     // Un bucket por IP. ConcurrentHashMap es thread-safe para el entorno reactivo.
     private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
 
-    public RateLimiterFilter() {
+    public RateLimiterGatewayFilterFactory() {
         super(Config.class);
     }
 
